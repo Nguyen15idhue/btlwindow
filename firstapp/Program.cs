@@ -1,10 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace firstapp
+namespace btlwindow
 {
     internal static class Program
     {
@@ -16,7 +16,7 @@ namespace firstapp
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            frmLogin loginForm = new frmLogin(); if (loginForm.ShowDialog() == DialogResult.OK) { Application.Run(new Form1()); }
         }
     }
 }
