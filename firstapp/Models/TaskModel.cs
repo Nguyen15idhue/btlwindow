@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace btlwindow
 {
@@ -21,6 +23,15 @@ namespace btlwindow
         public DateTime HanHoanThanh { get; set; } // han_hoan_thanh
         public string DoUuTien { get; set; } // do_uu_tien (Cao, Trung bình, Thấp)
 
+        // Nhóm công việc
+        public int? NhomId { get; set; } // nhom_id
+        public string TenNhom { get; set; } // ten_nhom
+        public string MauNhom { get; set; } // mau_nhom
+
+        // Tags
+        public List<string> Tags { get; set; } = new List<string>();
+        public List<string> TagsColors { get; set; } = new List<string>();
+
         // Kiểm tra task có quá hạn không
         public bool IsOverdue
         {
@@ -41,5 +52,42 @@ namespace btlwindow
             // Employee chỉ có thể sửa/xóa task của mình
             return NguoiTaoId == currentUserId;
         }
+
+        // Format tags thành chuỗi hiển thị
+        public string TagsDisplay
+        {
+            get
+            {
+                if (Tags == null || Tags.Count == 0)
+                    return "";
+                return string.Join(", ", Tags);
+            }
+        }
+
+        // Kiểm tra task có tag cụ thể không
+        public bool HasTag(string tagName)
+        {
+            return Tags != null && Tags.Any(t => t.Equals(tagName, StringComparison.OrdinalIgnoreCase));
+        }
+    }
+
+    // Model cho Tag
+    public class TagModel
+    {
+        public int Id { get; set; }
+        public string TenTag { get; set; }
+        public string MauSac { get; set; }
+        public DateTime NgayTao { get; set; }
+    }
+
+    // Model cho Nhóm công việc
+    public class NhomCongViecModel
+    {
+        public int Id { get; set; }
+        public string TenNhom { get; set; }
+        public string MauSac { get; set; }
+        public string MoTa { get; set; }
+        public int? NguoiTaoId { get; set; }
+        public DateTime NgayTao { get; set; }
     }
 }

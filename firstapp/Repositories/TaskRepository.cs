@@ -25,14 +25,14 @@ namespace btlwindow
         {
             List<TaskModel> list = new List<TaskModel>();
 
-            // Query đơn giản không cần JOIN thanh_vien
-            string query = @"SELECT id, tieu_de, 
-                            IFNULL(mo_ta, '') as mo_ta, 
-                            trang_thai, 
-                            IFNULL(nguoi_duoc_giao_id, 0) as nguoi_duoc_giao_id, 
-                            han_hoan_thanh, 
-                            IFNULL(do_uu_tien, 'Trung bình') as do_uu_tien
-                            FROM cong_viec";
+            // Query với JOIN để lấy tên người tạo và người được giao
+            string query = @"SELECT cv.*, 
+                            ng_giao.ho_ten as ten_nguoi_duoc_giao,
+                            ng_tao.ho_ten as ten_nguoi_tao
+                            FROM cong_viec cv
+                            LEFT JOIN nguoi_dung ng_giao ON cv.nguoi_duoc_giao_id = ng_giao.id
+                            LEFT JOIN nguoi_dung ng_tao ON cv.nguoi_tao_id = ng_tao.id
+                            ORDER BY cv.ngay_tao DESC";
 
             try
             {
@@ -48,15 +48,21 @@ namespace btlwindow
                             TaskModel task = new TaskModel();
                             task.Id = reader.GetInt32("id");
                             task.TieuDe = reader.GetString("tieu_de");
-                            task.MoTa = reader.GetString("mo_ta");
+                            task.MoTa = reader.IsDBNull(reader.GetOrdinal("mo_ta")) ? "" : reader.GetString("mo_ta");
                             task.TrangThai = reader.GetString("trang_thai");
-                            task.NguoiDuocGiaoId = reader.GetInt32("nguoi_duoc_giao_id");
+
+                            // Người tạo
+                            task.NguoiTaoId = reader.IsDBNull(reader.GetOrdinal("nguoi_tao_id")) ? 0 : reader.GetInt32("nguoi_tao_id");
+                            task.TenNguoiTao = reader.IsDBNull(reader.GetOrdinal("ten_nguoi_tao")) ? "" : reader.GetString("ten_nguoi_tao");
+
+                            // Người được giao
+                            task.NguoiDuocGiaoId = reader.IsDBNull(reader.GetOrdinal("nguoi_duoc_giao_id")) ? 0 : reader.GetInt32("nguoi_duoc_giao_id");
+                            task.TenNguoiDuocGiao = reader.IsDBNull(reader.GetOrdinal("ten_nguoi_duoc_giao")) ? "Chưa giao" : reader.GetString("ten_nguoi_duoc_giao");
 
                             if (!reader.IsDBNull(reader.GetOrdinal("han_hoan_thanh")))
                                 task.HanHoanThanh = reader.GetDateTime("han_hoan_thanh");
 
-                            task.DoUuTien = reader.GetString("do_uu_tien");
-                            task.TenNguoiDuocGiao = task.NguoiDuocGiaoId > 0 ? "Người #" + task.NguoiDuocGiaoId : "Chưa giao";
+                            task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
 
                             list.Add(task);
                         }
@@ -205,6 +211,125 @@ namespace btlwindow
                 MessageBox.Show("Lỗi cập nhật trạng thái: " + ex.Message);
                 return false;
             }
+        }
+
+        // ==========================================================
+        // HÀM 6: DeleteTask - Xóa task
+        // ==========================================================
+        public static bool DeleteTask(int taskId)
+        {
+            string query = "DELETE FROM cong_viec WHERE id = @id";
+
+            try
+            {
+                using (MySqlConnection conn = GetConnection())
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@id", taskId);
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi xóa task: " + ex.Message, "Lỗi",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        // ==========================================================
+        // HÀM 7: UpdateTask - Cập nhật thông tin task
+        // ==========================================================
+        public static bool UpdateTask(int taskId, string tieuDe, string moTa, int nguoiDuocGiaoId, DateTime hanHoanThanh, string doUuTien)
+        {
+            string query = @"UPDATE cong_viec 
+                            SET tieu_de = @tieuDe, 
+                                mo_ta = @moTa, 
+                                nguoi_duoc_giao_id = @nguoiDuocGiao, 
+                                han_hoan_thanh = @hanHoanThanh, 
+                                do_uu_tien = @doUuTien 
+                            WHERE id = @id";
+
+            try
+            {
+                using (MySqlConnection conn = GetConnection())
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@tieuDe", tieuDe);
+                    cmd.Parameters.AddWithValue("@moTa", moTa ?? "");
+                    cmd.Parameters.AddWithValue("@nguoiDuocGiao", nguoiDuocGiaoId > 0 ? (object)nguoiDuocGiaoId : DBNull.Value);
+                    cmd.Parameters.AddWithValue("@hanHoanThanh", hanHoanThanh);
+                    cmd.Parameters.AddWithValue("@doUuTien", doUuTien ?? "Trung bình");
+                    cmd.Parameters.AddWithValue("@id", taskId);
+
+                    int rowsAffected = cmd.ExecuteNonQuery();
+                    return rowsAffected > 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi cập nhật task: " + ex.Message, "Lỗi",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        // ==========================================================
+        // HÀM 8: GetTaskById - Lấy task theo ID
+        // ==========================================================
+        public static TaskModel GetTaskById(int taskId)
+        {
+            string query = @"SELECT cv.*, 
+                            ng_giao.ho_ten as ten_nguoi_duoc_giao,
+                            ng_tao.ho_ten as ten_nguoi_tao
+                            FROM cong_viec cv
+                            LEFT JOIN nguoi_dung ng_giao ON cv.nguoi_duoc_giao_id = ng_giao.id
+                            LEFT JOIN nguoi_dung ng_tao ON cv.nguoi_tao_id = ng_tao.id
+                            WHERE cv.id = @id";
+
+            try
+            {
+                using (MySqlConnection conn = GetConnection())
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@id", taskId);
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            TaskModel task = new TaskModel();
+                            task.Id = reader.GetInt32("id");
+                            task.TieuDe = reader.GetString("tieu_de");
+                            task.MoTa = reader.IsDBNull(reader.GetOrdinal("mo_ta")) ? "" : reader.GetString("mo_ta");
+                            task.TrangThai = reader.GetString("trang_thai");
+
+                            task.NguoiTaoId = reader.IsDBNull(reader.GetOrdinal("nguoi_tao_id")) ? 0 : reader.GetInt32("nguoi_tao_id");
+                            task.TenNguoiTao = reader.IsDBNull(reader.GetOrdinal("ten_nguoi_tao")) ? "" : reader.GetString("ten_nguoi_tao");
+
+                            task.NguoiDuocGiaoId = reader.IsDBNull(reader.GetOrdinal("nguoi_duoc_giao_id")) ? 0 : reader.GetInt32("nguoi_duoc_giao_id");
+                            task.TenNguoiDuocGiao = reader.IsDBNull(reader.GetOrdinal("ten_nguoi_duoc_giao")) ? "Chưa giao" : reader.GetString("ten_nguoi_duoc_giao");
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("han_hoan_thanh")))
+                                task.HanHoanThanh = reader.GetDateTime("han_hoan_thanh");
+
+                            task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
+
+                            return task;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi lấy thông tin task: " + ex.Message);
+            }
+
+            return null;
         }
     }
 }

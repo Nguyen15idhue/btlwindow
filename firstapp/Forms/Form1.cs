@@ -30,8 +30,119 @@ namespace btlwindow
             cbFilterPriority.SelectedIndex = 0; // "Tất cả"
             cbSort.SelectedIndex = 0; // "Mặc định"
 
+            // Enable Drag & Drop cho các FlowLayoutPanel
+            SetupDragAndDrop();
+
             // Load dữ liệu
             LoadAllTasks();
+        }
+
+        // ============================================================
+        // SETUP DRAG & DROP
+        // ============================================================
+        private void SetupDragAndDrop()
+        {
+            // Enable drag & drop cho các FlowLayoutPanel
+            flpTodo.AllowDrop = true;
+            flpDoing.AllowDrop = true;
+            flpDone.AllowDrop = true;
+
+            // Todo column events
+            flpTodo.DragEnter += FlowLayoutPanel_DragEnter;
+            flpTodo.DragOver += FlowLayoutPanel_DragOver;
+            flpTodo.DragDrop += (s, e) => FlowLayoutPanel_DragDrop(s, e, "Todo");
+
+            // Doing column events
+            flpDoing.DragEnter += FlowLayoutPanel_DragEnter;
+            flpDoing.DragOver += FlowLayoutPanel_DragOver;
+            flpDoing.DragDrop += (s, e) => FlowLayoutPanel_DragDrop(s, e, "Doing");
+
+            // Done column events
+            flpDone.DragEnter += FlowLayoutPanel_DragEnter;
+            flpDone.DragOver += FlowLayoutPanel_DragOver;
+            flpDone.DragDrop += (s, e) => FlowLayoutPanel_DragDrop(s, e, "Done");
+        }
+
+        // ============================================================
+        // DRAG ENTER - CHO PHÉP DROP
+        // ============================================================
+        private void FlowLayoutPanel_DragEnter(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(TaskModel)))
+            {
+                e.Effect = DragDropEffects.Move;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        // ============================================================
+        // DRAG OVER - LIÊN TỤC CHO PHÉP DROP
+        // ============================================================
+        private void FlowLayoutPanel_DragOver(object sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(typeof(TaskModel)))
+            {
+                e.Effect = DragDropEffects.Move;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        // ============================================================
+        // DRAG DROP - CẬP NHẬT TRẠNG THÁI TASK
+        // ============================================================
+        private void FlowLayoutPanel_DragDrop(object sender, DragEventArgs e, string newStatus)
+        {
+            if (e.Data.GetDataPresent(typeof(TaskModel)))
+            {
+                TaskModel task = (TaskModel)e.Data.GetData(typeof(TaskModel));
+
+                // Nếu trạng thái không thay đổi, không làm gì
+                if (task.TrangThai == newStatus)
+                {
+                    return;
+                }
+
+                // Cập nhật trạng thái trong database
+                bool success = TaskRepository.UpdateTaskStatus(task.Id, newStatus);
+
+                if (success)
+                {
+                    // Cập nhật trạng thái trong cache
+                    task.TrangThai = newStatus;
+
+                    // Refresh bảng Kanban
+                    RefreshKanbanBoard();
+
+                    // Hiển thị thông báo nhẹ (có thể bỏ nếu muốn UX mượt hơn)
+                    // MessageBox.Show($"Đã chuyển task sang {GetStatusText(newStatus)}", "Thành công", 
+                    //     MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("Không thể cập nhật trạng thái task!", "Lỗi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        // ============================================================
+        // HELPER - LẤY TÊN TRẠNG THÁI
+        // ============================================================
+        private string GetStatusText(string status)
+        {
+            switch (status)
+            {
+                case "Todo": return "CẦN LÀM";
+                case "Doing": return "ĐANG LÀM";
+                case "Done": return "ĐÃ XONG";
+                default: return status;
+            }
         }
 
         // ============================================================
@@ -72,6 +183,11 @@ namespace btlwindow
                 item.SetData(task);
                 item.Width = flpTodo.Width - 30; // Fit width
 
+                // Kết nối các sự kiện từ TaskItem
+                item.ViewClicked += TaskItem_ViewClicked;
+                item.EditClicked += TaskItem_EditClicked;
+                item.DeleteClicked += TaskItem_DeleteClicked;
+
                 // Phân loại vào đúng cột dựa theo trạng thái
                 switch (task.TrangThai)
                 {
@@ -87,6 +203,66 @@ namespace btlwindow
                     default:
                         flpTodo.Controls.Add(item);
                         break;
+                }
+            }
+        }
+
+        // ============================================================
+        // XỬ LÝ SỰ KIỆN NÚT XEM CHI TIẾT TASK
+        // ============================================================
+        private void TaskItem_ViewClicked(object sender, EventArgs e)
+        {
+            TaskItem taskItem = sender as TaskItem;
+            if (taskItem != null && taskItem.TaskData != null)
+            {
+                // Mở form xem chi tiết
+                frmTaskDetail detailForm = new frmTaskDetail(taskItem.TaskData);
+                detailForm.ShowDialog();
+            }
+        }
+
+        // ============================================================
+        // XỬ LÝ SỰ KIỆN NÚT SỬA TASK
+        // ============================================================
+        private void TaskItem_EditClicked(object sender, EventArgs e)
+        {
+            TaskItem taskItem = sender as TaskItem;
+            if (taskItem != null && taskItem.TaskData != null)
+            {
+                // Mở form sửa task (sử dụng lại frmAddTask với chế độ Edit)
+                frmAddTask editForm = new frmAddTask(taskItem.TaskData);
+                if (editForm.ShowDialog() == DialogResult.OK)
+                {
+                    // Reload dữ liệu sau khi sửa
+                    LoadAllTasks();
+                }
+            }
+        }
+
+        // ============================================================
+        // XỬ LÝ SỰ KIỆN NÚT XÓA TASK
+        // ============================================================
+        private void TaskItem_DeleteClicked(object sender, EventArgs e)
+        {
+            TaskItem taskItem = sender as TaskItem;
+            if (taskItem != null && taskItem.TaskData != null)
+            {
+                // Xác nhận xóa đã được xử lý trong TaskItem.cs
+                // Thực hiện xóa task
+                bool success = TaskRepository.DeleteTask(taskItem.TaskData.Id);
+
+                if (success)
+                {
+                    MessageBox.Show("Đã xóa task thành công!", "Thành công",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // Reload dữ liệu
+                    LoadAllTasks();
+                }
+                else
+                {
+                    MessageBox.Show("Không thể xóa task. Vui lòng thử lại!", "Lỗi",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -222,14 +398,24 @@ namespace btlwindow
 
             if (result == DialogResult.Yes)
             {
+                // Xóa thông tin user hiện tại
                 CurrentUser.Logout();
-                this.Close();
+
+                // Đóng form hiện tại
+                this.Hide();
 
                 // Hiển thị lại form đăng nhập
                 frmLogin loginForm = new frmLogin();
                 if (loginForm.ShowDialog() == DialogResult.OK)
                 {
-                    Application.Run(new Form1());
+                    // Nếu đăng nhập thành công, mở lại Form1 mới
+                    Form1 mainForm = new Form1();
+                    mainForm.Show();
+                }
+                else
+                {
+                    // Nếu không đăng nhập, thoát ứng dụng
+                    Application.Exit();
                 }
             }
         }
