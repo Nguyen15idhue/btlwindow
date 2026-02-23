@@ -1,6 +1,6 @@
 -- ========================================
--- KANBAN TASK MANAGER - FULL DATABASE SETUP
--- Tích hợp từ database_with_auth.sql và database_update.sql
+-- KANBAN TASK MANAGER - DATABASE SETUP
+-- Phiên bản với phân quyền User
 -- ========================================
 
 -- Tạo database nếu chưa có
@@ -23,19 +23,7 @@ CREATE TABLE nguoi_dung (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================================
--- 2. Bảng THÀNH VIÊN (Members)
--- ========================================
-DROP TABLE IF EXISTS thanh_vien;
-CREATE TABLE thanh_vien (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    ho_ten VARCHAR(100) NOT NULL,
-    email VARCHAR(100),
-    so_dien_thoai VARCHAR(20),
-    ngay_tao DATETIME DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- ========================================
--- 3. Bảng CÔNG VIỆC (Tasks)
+-- 2. Bảng CÔNG VIỆC (Tasks) - CẬP NHẬT
 -- ========================================
 DROP TABLE IF EXISTS cong_viec;
 CREATE TABLE cong_viec (
@@ -56,7 +44,7 @@ CREATE TABLE cong_viec (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ========================================
--- 4. DỮ LIỆU MẪU - USERS
+-- 3. DỮ LIỆU MẪU - USERS
 -- ========================================
 -- Mật khẩu mặc định cho tất cả user: 123456
 -- SHA256 hash của "123456" = 8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92
@@ -69,17 +57,7 @@ INSERT INTO nguoi_dung (ho_ten, email, mat_khau, role) VALUES
 ('Hoàng Văn E (Manager)', 'manager2@kanban.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'Manager');
 
 -- ========================================
--- 5. DỮ LIỆU MẪU - THÀNH VIÊN
--- ========================================
-INSERT INTO thanh_vien (id, ho_ten, email, so_dien_thoai) VALUES 
-(1, 'Nguyễn Văn A', 'nguyenvana@email.com', '0901234567'),
-(2, 'Trần Thị B', 'tranthib@email.com', '0912345678'),
-(3, 'Lê Văn C', 'levanc@email.com', '0923456789'),
-(4, 'Phạm Thị D', 'phamthid@email.com', '0934567890'),
-(5, 'Hoàng Văn E', 'hoangvane@email.com', '0945678901');
-
--- ========================================
--- 6. DỮ LIỆU MẪU - TASKS
+-- 4. DỮ LIỆU MẪU - TASKS
 -- ========================================
 INSERT INTO cong_viec (tieu_de, mo_ta, trang_thai, nguoi_tao_id, nguoi_duoc_giao_id, do_uu_tien, han_hoan_thanh) VALUES
 -- Tasks do Manager tạo
@@ -98,7 +76,7 @@ INSERT INTO cong_viec (tieu_de, mo_ta, trang_thai, nguoi_tao_id, nguoi_duoc_giao
 ('Viết unit tests', 'Tăng coverage lên 80%', 'Doing', 2, 2, 'Trung bình', DATE_SUB(NOW(), INTERVAL 1 DAY));
 
 -- ========================================
--- 7. THÔNG TIN ĐĂNG NHẬP MẪU
+-- 5. THÔNG TIN ĐĂNG NHẬP MẪU
 -- ========================================
 /*
 TÀI KHOẢN TEST:
@@ -121,7 +99,7 @@ TÀI KHOẢN TEST:
 */
 
 -- ========================================
--- 8. QUERIES HỮU ÍCH
+-- 6. QUERIES HỮU ÍCH
 -- ========================================
 
 -- Xem tất cả users
