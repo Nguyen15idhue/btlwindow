@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace btlwindow
@@ -19,6 +20,7 @@ namespace btlwindow
         public frmAddTask()
         {
             InitializeComponent();
+            ApplyTheme();
             isEditMode = false;
         }
 
@@ -26,8 +28,20 @@ namespace btlwindow
         public frmAddTask(TaskModel task)
         {
             InitializeComponent();
+            ApplyTheme();
             isEditMode = true;
             taskToEdit = task;
+        }
+
+        private void ApplyTheme()
+        {
+            // Form style
+            StyleHelper.ApplyDialogStyle(this);
+            this.BackColor = AppTheme.BackgroundWhite;
+
+            // Buttons
+            StyleHelper.ApplySuccessButton(btnSave);
+            StyleHelper.ApplySecondaryButton(btnCancel);
         }
 
         private void frmAddTask_Load(object sender, EventArgs e)
@@ -41,6 +55,12 @@ namespace btlwindow
 
             // Load danh sách thành viên
             LoadMembers();
+
+            // Load danh sách nhóm
+            LoadGroups();
+
+            // Load danh sách tags
+            LoadTags();
 
             // Đặt deadline mặc định là ngày mai
             dtpDeadline.Value = DateTime.Today.AddDays(1);
@@ -73,6 +93,32 @@ namespace btlwindow
             cbNguoiThucHien.DisplayMember = "Value";
             cbNguoiThucHien.ValueMember = "Key";
             cbNguoiThucHien.SelectedIndex = 0;
+        }
+
+        private void LoadGroups()
+        {
+            cbNhom.Items.Clear();
+            cbNhom.Items.Add(new KeyValuePair<int, string>(0, "-- Khong chon nhom --"));
+
+            var groups = TagGroupRepository.GetAllGroups();
+            foreach (var group in groups)
+            {
+                cbNhom.Items.Add(new KeyValuePair<int, string>(group.Id, group.TenNhom));
+            }
+
+            cbNhom.DisplayMember = "Value";
+            cbNhom.ValueMember = "Key";
+            cbNhom.SelectedIndex = 0;
+        }
+
+        private void LoadTags()
+        {
+            clbTags.Items.Clear();
+            var tags = TagGroupRepository.GetAllTags();
+            foreach (var tag in tags)
+            {
+                clbTags.Items.Add(tag.TenTag, false);
+            }
         }
 
         // Load dữ liệu task vào form (chế độ Edit)
@@ -117,6 +163,33 @@ namespace btlwindow
                     }
                 }
             }
+
+            // Set nhóm
+            if (taskToEdit.NhomId.HasValue && taskToEdit.NhomId > 0)
+            {
+                for (int i = 0; i < cbNhom.Items.Count; i++)
+                {
+                    var item = cbNhom.Items[i];
+                    if (item is KeyValuePair<int, string> kvp && kvp.Key == taskToEdit.NhomId.Value)
+                    {
+                        cbNhom.SelectedIndex = i;
+                        break;
+                    }
+                }
+            }
+
+            // Set tags
+            if (taskToEdit.Tags != null && taskToEdit.Tags.Count > 0)
+            {
+                for (int i = 0; i < clbTags.Items.Count; i++)
+                {
+                    string tagName = clbTags.Items[i].ToString();
+                    if (taskToEdit.Tags.Contains(tagName))
+                    {
+                        clbTags.SetItemChecked(i, true);
+                    }
+                }
+            }
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -153,6 +226,26 @@ namespace btlwindow
                 nguoiThucHienId = selected.Key;
             }
 
+            // Lấy nhóm
+            int? nhomId = null;
+            if (cbNhom.SelectedItem is KeyValuePair<int, string> selectedGroup && selectedGroup.Key > 0)
+            {
+                nhomId = selectedGroup.Key;
+            }
+
+            // Lấy tags đã chọn
+            List<int> tagIds = new List<int>();
+            var allTags = TagGroupRepository.GetAllTags();
+            for (int i = 0; i < clbTags.CheckedItems.Count; i++)
+            {
+                string tagName = clbTags.CheckedItems[i].ToString();
+                var tag = allTags.FirstOrDefault(t => t.TenTag == tagName);
+                if (tag != null)
+                {
+                    tagIds.Add(tag.Id);
+                }
+            }
+
             bool success = false;
 
             if (isEditMode)
@@ -164,7 +257,9 @@ namespace btlwindow
                     txtMoTa.Text.Trim(),
                     nguoiThucHienId,
                     dtpDeadline.Value,
-                    cbDoUuTien.SelectedItem?.ToString() ?? "Trung bình"
+                    cbDoUuTien.SelectedItem?.ToString() ?? "Trung bình",
+                    nhomId,
+                    tagIds
                 );
 
                 if (success)

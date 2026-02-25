@@ -9,6 +9,17 @@ namespace btlwindow
         public frmRegister()
         {
             InitializeComponent();
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            StyleHelper.ApplyDialogStyle(this);
+            this.BackColor = AppTheme.BackgroundWhite;
+
+            // Buttons
+            StyleHelper.ApplySuccessButton(btnRegister);
+            StyleHelper.ApplySecondaryButton(btnCancel);
         }
 
         private void btnRegister_Click(object sender, EventArgs e)
@@ -83,6 +94,7 @@ namespace btlwindow
             {
                 MessageBox.Show("Đăng ký thành công!\nVui lòng đăng nhập để tiếp tục.", 
                     "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.DialogResult = DialogResult.OK;
                 this.Close();
             }
         }

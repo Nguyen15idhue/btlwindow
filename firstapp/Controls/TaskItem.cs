@@ -70,19 +70,19 @@ namespace btlwindow
                 // Logic đổi màu nếu quá hạn
                 if (task.IsOverdue)
                 {
-                    lblDeadline.ForeColor = Color.FromArgb(231, 76, 60);
+                    lblDeadline.ForeColor = AppTheme.DangerColor;
                     lblDeadline.Text += " ⚠️";
                     this.BackColor = Color.FromArgb(255, 235, 235);
                 }
                 else
                 {
-                    lblDeadline.ForeColor = Color.FromArgb(127, 140, 141);
+                    lblDeadline.ForeColor = AppTheme.TextSecondary;
                 }
             }
             else
             {
                 lblDeadline.Text = "📅 Không thời hạn";
-                lblDeadline.ForeColor = Color.FromArgb(127, 140, 141);
+                lblDeadline.ForeColor = AppTheme.TextSecondary;
             }
 
             // Hiển thị độ ưu tiên
@@ -143,27 +143,25 @@ namespace btlwindow
 
         private void SetPriorityStyle(string priority)
         {
+            Color priorityColor = AppTheme.GetPriorityColor(priority);
+            panelPriorityBar.BackColor = priorityColor;
+            lblPriority.ForeColor = priorityColor;
+
             switch (priority)
             {
                 case "Cao":
                     lblPriority.Text = "🔴 Cao";
-                    lblPriority.ForeColor = Color.FromArgb(231, 76, 60);
-                    panelPriorityBar.BackColor = Color.FromArgb(231, 76, 60);
                     break;
                 case "Trung bình":
                     lblPriority.Text = "🟡 TB";
-                    lblPriority.ForeColor = Color.FromArgb(241, 196, 15);
-                    panelPriorityBar.BackColor = Color.FromArgb(241, 196, 15);
                     break;
                 case "Thấp":
                     lblPriority.Text = "🟢 Thấp";
-                    lblPriority.ForeColor = Color.FromArgb(46, 204, 113);
-                    panelPriorityBar.BackColor = Color.FromArgb(46, 204, 113);
                     break;
                 default:
                     lblPriority.Text = "⚪ N/A";
-                    lblPriority.ForeColor = Color.Gray;
-                    panelPriorityBar.BackColor = Color.Gray;
+                    lblPriority.ForeColor = AppTheme.TextMuted;
+                    panelPriorityBar.BackColor = AppTheme.TextMuted;
                     break;
             }
         }

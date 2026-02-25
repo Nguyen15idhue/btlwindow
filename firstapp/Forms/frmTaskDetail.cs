@@ -12,6 +12,14 @@ namespace btlwindow
         {
             InitializeComponent();
             task = taskData;
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            StyleHelper.ApplyDialogStyle(this);
+            this.BackColor = AppTheme.BackgroundWhite;
+            StyleHelper.ApplyPrimaryButton(btnClose);
         }
 
         private void frmTaskDetail_Load(object sender, EventArgs e)
@@ -21,66 +29,56 @@ namespace btlwindow
             // Hiển thị tiêu đề
             this.Text = "Chi tiết: " + task.TieuDe;
             lblTitleValue.Text = task.TieuDe;
-            
+
             // Hiển thị mô tả
             txtDescription.Text = task.MoTa ?? "Không có mô tả";
-            
+
             // Hiển thị người tạo và người được giao
             lblCreatorValue.Text = task.TenNguoiTao ?? "Không rõ";
             lblAssigneeValue.Text = task.TenNguoiDuocGiao ?? "Chưa giao";
-            
+
             // Hiển thị deadline
             if (task.HanHoanThanh != DateTime.MinValue)
             {
                 lblDeadlineValue.Text = task.HanHoanThanh.ToString("dd/MM/yyyy HH:mm");
-                
+
                 if (task.IsOverdue)
                 {
-                    lblDeadlineValue.ForeColor = Color.FromArgb(231, 76, 60);
+                    lblDeadlineValue.ForeColor = AppTheme.DangerColor;
                     lblDeadlineValue.Text += " ⚠️ (Quá hạn)";
                 }
                 else
                 {
-                    lblDeadlineValue.ForeColor = Color.FromArgb(46, 204, 113);
+                    lblDeadlineValue.ForeColor = AppTheme.SuccessColor;
                 }
             }
             else
             {
                 lblDeadlineValue.Text = "Không có thời hạn";
-                lblDeadlineValue.ForeColor = Color.Gray;
+                lblDeadlineValue.ForeColor = AppTheme.TextMuted;
             }
 
             // Hiển thị độ ưu tiên
             lblPriorityValue.Text = task.DoUuTien ?? "Trung bình";
-            switch (task.DoUuTien)
+            lblPriorityValue.ForeColor = AppTheme.GetPriorityColor(task.DoUuTien);
+            if (task.DoUuTien == "Cao")
             {
-                case "Cao":
-                    lblPriorityValue.ForeColor = Color.FromArgb(231, 76, 60);
-                    lblPriorityValue.Font = new Font(lblPriorityValue.Font, FontStyle.Bold);
-                    break;
-                case "Trung bình":
-                    lblPriorityValue.ForeColor = Color.FromArgb(241, 196, 15);
-                    break;
-                case "Thấp":
-                    lblPriorityValue.ForeColor = Color.FromArgb(46, 204, 113);
-                    break;
+                lblPriorityValue.Font = AppTheme.FontBodyBold;
             }
 
             // Hiển thị trạng thái
             lblStatusValue.Text = GetStatusText(task.TrangThai);
             lblStatusValue.Padding = new Padding(5, 2, 5, 2);
+            lblStatusValue.ForeColor = AppTheme.GetColumnColor(task.TrangThai);
             switch (task.TrangThai)
             {
                 case "Todo":
-                    lblStatusValue.ForeColor = Color.FromArgb(241, 196, 15);
                     lblStatusValue.BackColor = Color.FromArgb(255, 249, 196);
                     break;
                 case "Doing":
-                    lblStatusValue.ForeColor = Color.FromArgb(52, 152, 219);
                     lblStatusValue.BackColor = Color.FromArgb(214, 234, 248);
                     break;
                 case "Done":
-                    lblStatusValue.ForeColor = Color.FromArgb(46, 204, 113);
                     lblStatusValue.BackColor = Color.FromArgb(212, 239, 223);
                     break;
             }
@@ -101,7 +99,7 @@ namespace btlwindow
             else
             {
                 lblGroupValue.Text = "Không có nhóm";
-                lblGroupValue.ForeColor = Color.Gray;
+                lblGroupValue.ForeColor = AppTheme.TextMuted;
             }
 
             // Hiển thị tags

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{A5A9657C-A7FB-4627-9E73-1AFD6893AB2F}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>firstapp</RootNamespace>
-    <AssemblyName>firstapp</AssemblyName>
+    <RootNamespace>btlwindow</RootNamespace>
+    <AssemblyName>btlwindow</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -95,6 +95,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\ucTagGroup.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ucTagGroup.Designer.cs">
+      <DependentUpon>ucTagGroup.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -119,6 +125,12 @@
     <Compile Include="Forms\frmRegister.Designer.cs">
       <DependentUpon>frmRegister.cs</DependentUpon>
     </Compile>
+    <Compile Include="Forms\frmTagGroupEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\frmTagGroupEdit.Designer.cs">
+      <DependentUpon>frmTagGroupEdit.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\frmTaskDetail.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -134,9 +146,30 @@
       <DependentUpon>TaskItem.cs</DependentUpon>
     </Compile>
     <Compile Include="Models\TaskModel.cs" />
+    <Compile Include="Repositories\TagGroupRepository.cs" />
     <Compile Include="Repositories\TaskRepository.cs" />
     <Compile Include="Models\UserModel.cs" />
     <Compile Include="Repositories\UserRepository.cs" />
+    <Compile Include="Controls\ucReport.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ucReport.Designer.cs">
+      <DependentUpon>ucReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\ucManageMembers.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ucManageMembers.Designer.cs">
+      <DependentUpon>ucManageMembers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\AppTheme.cs" />
+    <Compile Include="Helpers\StyleHelper.cs" />
+    <Compile Include="Helpers\NavigationManager.cs" />
+    <Compile Include="Repositories\MemberRepository.cs" />
+    <Compile Include="Models\MemberModel.cs" />
+    <EmbeddedResource Include="Controls\ucTagGroup.resx">
+      <DependentUpon>ucTagGroup.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Forms\Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
     </EmbeddedResource>
@@ -149,6 +182,9 @@
     <EmbeddedResource Include="Forms\frmRegister.resx">
       <DependentUpon>frmRegister.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="Forms\frmTagGroupEdit.resx">
+      <DependentUpon>frmTagGroupEdit.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -160,6 +196,12 @@
     </Compile>
     <EmbeddedResource Include="Controls\TaskItem.resx">
       <DependentUpon>TaskItem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ucReport.resx">
+      <DependentUpon>ucReport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ucManageMembers.resx">
+      <DependentUpon>ucManageMembers.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Database\README_MIGRATIONS_AND_SEEDS.md" />
     <None Include="Database\Scripts\detect-mysql.ps1" />

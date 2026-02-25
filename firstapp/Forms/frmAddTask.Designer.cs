@@ -41,6 +41,10 @@ namespace btlwindow
             this.dtpDeadline = new System.Windows.Forms.DateTimePicker();
             this.lblDoUuTien = new System.Windows.Forms.Label();
             this.cbDoUuTien = new System.Windows.Forms.ComboBox();
+            this.lblNhom = new System.Windows.Forms.Label();
+            this.cbNhom = new System.Windows.Forms.ComboBox();
+            this.lblTags = new System.Windows.Forms.Label();
+            this.clbTags = new System.Windows.Forms.CheckedListBox();
             this.panelButtons = new System.Windows.Forms.Panel();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
@@ -74,6 +78,10 @@ namespace btlwindow
             // panelContent
             // 
             this.panelContent.BackColor = System.Drawing.Color.White;
+            this.panelContent.Controls.Add(this.clbTags);
+            this.panelContent.Controls.Add(this.lblTags);
+            this.panelContent.Controls.Add(this.cbNhom);
+            this.panelContent.Controls.Add(this.lblNhom);
             this.panelContent.Controls.Add(this.cbDoUuTien);
             this.panelContent.Controls.Add(this.lblDoUuTien);
             this.panelContent.Controls.Add(this.dtpDeadline);
@@ -88,7 +96,7 @@ namespace btlwindow
             this.panelContent.Location = new System.Drawing.Point(0, 60);
             this.panelContent.Name = "panelContent";
             this.panelContent.Padding = new System.Windows.Forms.Padding(20);
-            this.panelContent.Size = new System.Drawing.Size(480, 330);
+            this.panelContent.Size = new System.Drawing.Size(480, 450);
             this.panelContent.TabIndex = 1;
             // 
             // lblTieuDe
@@ -194,13 +202,55 @@ namespace btlwindow
             this.cbDoUuTien.Size = new System.Drawing.Size(200, 31);
             this.cbDoUuTien.TabIndex = 9;
             // 
+            // lblNhom
+            // 
+            this.lblNhom.AutoSize = true;
+            this.lblNhom.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblNhom.ForeColor = System.Drawing.Color.FromArgb(52, 73, 94);
+            this.lblNhom.Location = new System.Drawing.Point(240, 252);
+            this.lblNhom.Name = "lblNhom";
+            this.lblNhom.Size = new System.Drawing.Size(58, 23);
+            this.lblNhom.TabIndex = 10;
+            this.lblNhom.Text = "Nhom:";
+            // 
+            // cbNhom
+            // 
+            this.cbNhom.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cbNhom.Font = new System.Drawing.Font("Segoe UI", 10F);
+            this.cbNhom.FormattingEnabled = true;
+            this.cbNhom.Location = new System.Drawing.Point(240, 278);
+            this.cbNhom.Name = "cbNhom";
+            this.cbNhom.Size = new System.Drawing.Size(220, 31);
+            this.cbNhom.TabIndex = 11;
+            // 
+            // lblTags
+            // 
+            this.lblTags.AutoSize = true;
+            this.lblTags.Font = new System.Drawing.Font("Segoe UI", 10F, System.Drawing.FontStyle.Bold);
+            this.lblTags.ForeColor = System.Drawing.Color.FromArgb(52, 73, 94);
+            this.lblTags.Location = new System.Drawing.Point(20, 320);
+            this.lblTags.Name = "lblTags";
+            this.lblTags.Size = new System.Drawing.Size(48, 23);
+            this.lblTags.TabIndex = 12;
+            this.lblTags.Text = "Tags:";
+            // 
+            // clbTags
+            // 
+            this.clbTags.CheckOnClick = true;
+            this.clbTags.Font = new System.Drawing.Font("Segoe UI", 9F);
+            this.clbTags.FormattingEnabled = true;
+            this.clbTags.Location = new System.Drawing.Point(20, 346);
+            this.clbTags.Name = "clbTags";
+            this.clbTags.Size = new System.Drawing.Size(440, 84);
+            this.clbTags.TabIndex = 13;
+            // 
             // panelButtons
             // 
             this.panelButtons.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(245)))), ((int)(((byte)(245)))), ((int)(((byte)(245)))));
             this.panelButtons.Controls.Add(this.btnSave);
             this.panelButtons.Controls.Add(this.btnCancel);
             this.panelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.panelButtons.Location = new System.Drawing.Point(0, 390);
+            this.panelButtons.Location = new System.Drawing.Point(0, 510);
             this.panelButtons.Name = "panelButtons";
             this.panelButtons.Size = new System.Drawing.Size(480, 60);
             this.panelButtons.TabIndex = 2;
@@ -244,7 +294,7 @@ namespace btlwindow
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(480, 450);
+            this.ClientSize = new System.Drawing.Size(480, 570);
             this.Controls.Add(this.panelContent);
             this.Controls.Add(this.panelButtons);
             this.Controls.Add(this.panelHeader);
@@ -277,6 +327,10 @@ namespace btlwindow
         private System.Windows.Forms.DateTimePicker dtpDeadline;
         private System.Windows.Forms.Label lblDoUuTien;
         private System.Windows.Forms.ComboBox cbDoUuTien;
+        private System.Windows.Forms.Label lblNhom;
+        private System.Windows.Forms.ComboBox cbNhom;
+        private System.Windows.Forms.Label lblTags;
+        private System.Windows.Forms.CheckedListBox clbTags;
         private System.Windows.Forms.Panel panelButtons;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnSave;

@@ -28,10 +28,12 @@ namespace btlwindow
             // Query với JOIN để lấy tên người tạo và người được giao
             string query = @"SELECT cv.*, 
                             ng_giao.ho_ten as ten_nguoi_duoc_giao,
-                            ng_tao.ho_ten as ten_nguoi_tao
+                            ng_tao.ho_ten as ten_nguoi_tao,
+                            n.ten_nhom, n.mau_sac as mau_nhom
                             FROM cong_viec cv
                             LEFT JOIN nguoi_dung ng_giao ON cv.nguoi_duoc_giao_id = ng_giao.id
                             LEFT JOIN nguoi_dung ng_tao ON cv.nguoi_tao_id = ng_tao.id
+                            LEFT JOIN nhom_cong_viec n ON cv.nhom_id = n.id
                             ORDER BY cv.ngay_tao DESC";
 
             try
@@ -64,8 +66,19 @@ namespace btlwindow
 
                             task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
 
+                            // Nhóm
+                            task.NhomId = reader.IsDBNull(reader.GetOrdinal("nhom_id")) ? (int?)null : reader.GetInt32("nhom_id");
+                            task.TenNhom = reader.IsDBNull(reader.GetOrdinal("ten_nhom")) ? "" : reader.GetString("ten_nhom");
+                            task.MauNhom = reader.IsDBNull(reader.GetOrdinal("mau_nhom")) ? "" : reader.GetString("mau_nhom");
+
                             list.Add(task);
                         }
+                    }
+
+                    // Load tags cho mỗi task
+                    foreach (var task in list)
+                    {
+                        LoadTaskTags(task, conn);
                     }
                 }
             }
@@ -77,14 +90,43 @@ namespace btlwindow
             return list;
         }
 
+        // Helper method để load tags cho 1 task
+        private static void LoadTaskTags(TaskModel task, MySqlConnection conn)
+        {
+            string query = @"SELECT t.ten_tag, t.mau_sac 
+                            FROM task_tag tt 
+                            INNER JOIN tags t ON tt.tag_id = t.id 
+                            WHERE tt.task_id = @taskId";
+            try
+            {
+                MySqlCommand cmd = new MySqlCommand(query, conn);
+                cmd.Parameters.AddWithValue("@taskId", task.Id);
+                using (MySqlDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        task.Tags.Add(reader.GetString("ten_tag"));
+                        task.TagsColors.Add(reader.IsDBNull(reader.GetOrdinal("mau_sac")) ? "#3498db" : reader.GetString("mau_sac"));
+                    }
+                }
+            }
+            catch { }
+        }
+
         // ==========================================================
         // HÀM 2: AddTask - Thêm mới công việc (Phiên bản đầy đủ với người tạo)
         // ==========================================================
         public static bool AddTask(string tieuDe, string moTa, int nguoiTaoId, int nguoiDuocGiaoId, DateTime hanHoanThanh, string doUuTien)
         {
+            return AddTask(tieuDe, moTa, nguoiTaoId, nguoiDuocGiaoId, hanHoanThanh, doUuTien, null, null);
+        }
+
+        // Overload với nhomId và tags
+        public static bool AddTask(string tieuDe, string moTa, int nguoiTaoId, int nguoiDuocGiaoId, DateTime hanHoanThanh, string doUuTien, int? nhomId, List<int> tagIds)
+        {
             string query = @"INSERT INTO cong_viec 
-                            (tieu_de, mo_ta, nguoi_tao_id, nguoi_duoc_giao_id, han_hoan_thanh, do_uu_tien, trang_thai, ngay_tao) 
-                            VALUES (@tieuDe, @moTa, @nguoiTao, @nguoiDuocGiao, @hanHoanThanh, @doUuTien, 'Todo', NOW())";
+                            (tieu_de, mo_ta, nguoi_tao_id, nguoi_duoc_giao_id, han_hoan_thanh, do_uu_tien, nhom_id, trang_thai, ngay_tao) 
+                            VALUES (@tieuDe, @moTa, @nguoiTao, @nguoiDuocGiao, @hanHoanThanh, @doUuTien, @nhomId, 'Todo', NOW())";
 
             try
             {
@@ -100,8 +142,26 @@ namespace btlwindow
                     cmd.Parameters.AddWithValue("@nguoiDuocGiao", nguoiDuocGiaoId > 0 ? (object)nguoiDuocGiaoId : DBNull.Value);
                     cmd.Parameters.AddWithValue("@hanHoanThanh", hanHoanThanh);
                     cmd.Parameters.AddWithValue("@doUuTien", doUuTien ?? "Trung bình");
+                    cmd.Parameters.AddWithValue("@nhomId", nhomId.HasValue && nhomId.Value > 0 ? (object)nhomId.Value : DBNull.Value);
 
-                    cmd.ExecuteNonQuery(); // Thực thi lệnh INSERT (không cần đọc về)
+                    cmd.ExecuteNonQuery();
+
+                    // Lấy ID của task vừa thêm
+                    long taskId = cmd.LastInsertedId;
+
+                    // Lưu tags vào bảng quan hệ task_tag
+                    if (tagIds != null && tagIds.Count > 0)
+                    {
+                        foreach (int tagId in tagIds)
+                        {
+                            string tagQuery = "INSERT INTO task_tag (task_id, tag_id) VALUES (@taskId, @tagId)";
+                            MySqlCommand tagCmd = new MySqlCommand(tagQuery, conn);
+                            tagCmd.Parameters.AddWithValue("@taskId", taskId);
+                            tagCmd.Parameters.AddWithValue("@tagId", tagId);
+                            tagCmd.ExecuteNonQuery();
+                        }
+                    }
+
                     return true;
                 }
             }
@@ -244,12 +304,19 @@ namespace btlwindow
         // ==========================================================
         public static bool UpdateTask(int taskId, string tieuDe, string moTa, int nguoiDuocGiaoId, DateTime hanHoanThanh, string doUuTien)
         {
+            return UpdateTask(taskId, tieuDe, moTa, nguoiDuocGiaoId, hanHoanThanh, doUuTien, null, null);
+        }
+
+        // Overload với nhomId và tags
+        public static bool UpdateTask(int taskId, string tieuDe, string moTa, int nguoiDuocGiaoId, DateTime hanHoanThanh, string doUuTien, int? nhomId, List<int> tagIds)
+        {
             string query = @"UPDATE cong_viec 
                             SET tieu_de = @tieuDe, 
                                 mo_ta = @moTa, 
                                 nguoi_duoc_giao_id = @nguoiDuocGiao, 
                                 han_hoan_thanh = @hanHoanThanh, 
-                                do_uu_tien = @doUuTien 
+                                do_uu_tien = @doUuTien,
+                                nhom_id = @nhomId
                             WHERE id = @id";
 
             try
@@ -263,9 +330,31 @@ namespace btlwindow
                     cmd.Parameters.AddWithValue("@nguoiDuocGiao", nguoiDuocGiaoId > 0 ? (object)nguoiDuocGiaoId : DBNull.Value);
                     cmd.Parameters.AddWithValue("@hanHoanThanh", hanHoanThanh);
                     cmd.Parameters.AddWithValue("@doUuTien", doUuTien ?? "Trung bình");
+                    cmd.Parameters.AddWithValue("@nhomId", nhomId.HasValue && nhomId.Value > 0 ? (object)nhomId.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("@id", taskId);
 
                     int rowsAffected = cmd.ExecuteNonQuery();
+
+                    // Xóa tags cũ và thêm mới
+                    if (tagIds != null)
+                    {
+                        // Xóa tất cả tags cũ
+                        string deleteTagsQuery = "DELETE FROM task_tag WHERE task_id = @taskId";
+                        MySqlCommand deleteCmd = new MySqlCommand(deleteTagsQuery, conn);
+                        deleteCmd.Parameters.AddWithValue("@taskId", taskId);
+                        deleteCmd.ExecuteNonQuery();
+
+                        // Thêm tags mới
+                        foreach (int tagId in tagIds)
+                        {
+                            string tagQuery = "INSERT INTO task_tag (task_id, tag_id) VALUES (@taskId, @tagId)";
+                            MySqlCommand tagCmd = new MySqlCommand(tagQuery, conn);
+                            tagCmd.Parameters.AddWithValue("@taskId", taskId);
+                            tagCmd.Parameters.AddWithValue("@tagId", tagId);
+                            tagCmd.ExecuteNonQuery();
+                        }
+                    }
+
                     return rowsAffected > 0;
                 }
             }
@@ -330,6 +419,65 @@ namespace btlwindow
             }
 
             return null;
+        }
+
+        // ==========================================================
+        // HÀM 9: GetTasksByDateRange - Lấy tasks theo khoảng thời gian
+        // ==========================================================
+        public static List<TaskModel> GetTasksByDateRange(DateTime fromDate, DateTime toDate)
+        {
+            List<TaskModel> list = new List<TaskModel>();
+
+            string query = @"SELECT cv.*, 
+                            ng_giao.ho_ten as ten_nguoi_duoc_giao,
+                            ng_tao.ho_ten as ten_nguoi_tao
+                            FROM cong_viec cv
+                            LEFT JOIN nguoi_dung ng_giao ON cv.nguoi_duoc_giao_id = ng_giao.id
+                            LEFT JOIN nguoi_dung ng_tao ON cv.nguoi_tao_id = ng_tao.id
+                            WHERE cv.ngay_tao >= @fromDate AND cv.ngay_tao <= @toDate
+                            ORDER BY cv.ngay_tao DESC";
+
+            try
+            {
+                using (MySqlConnection conn = GetConnection())
+                {
+                    conn.Open();
+                    MySqlCommand cmd = new MySqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@fromDate", fromDate);
+                    cmd.Parameters.AddWithValue("@toDate", toDate);
+
+                    using (MySqlDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            TaskModel task = new TaskModel();
+                            task.Id = reader.GetInt32("id");
+                            task.TieuDe = reader.GetString("tieu_de");
+                            task.MoTa = reader.IsDBNull(reader.GetOrdinal("mo_ta")) ? "" : reader.GetString("mo_ta");
+                            task.TrangThai = reader.GetString("trang_thai");
+
+                            task.NguoiTaoId = reader.IsDBNull(reader.GetOrdinal("nguoi_tao_id")) ? 0 : reader.GetInt32("nguoi_tao_id");
+                            task.TenNguoiTao = reader.IsDBNull(reader.GetOrdinal("ten_nguoi_tao")) ? "" : reader.GetString("ten_nguoi_tao");
+
+                            task.NguoiDuocGiaoId = reader.IsDBNull(reader.GetOrdinal("nguoi_duoc_giao_id")) ? 0 : reader.GetInt32("nguoi_duoc_giao_id");
+                            task.TenNguoiDuocGiao = reader.IsDBNull(reader.GetOrdinal("ten_nguoi_duoc_giao")) ? "Chưa giao" : reader.GetString("ten_nguoi_duoc_giao");
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("han_hoan_thanh")))
+                                task.HanHoanThanh = reader.GetDateTime("han_hoan_thanh");
+
+                            task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
+
+                            list.Add(task);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi lấy dữ liệu báo cáo: " + ex.Message);
+            }
+
+            return list;
         }
     }
 }

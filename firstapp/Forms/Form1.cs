@@ -15,6 +15,49 @@ namespace btlwindow
         public Form1()
         {
             InitializeComponent();
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            // Form style
+            this.BackColor = AppTheme.BackgroundLight;
+            this.Font = new Font(AppTheme.FontFamily, 9F);
+
+            // Sidebar
+            panelSidebar.BackColor = AppTheme.BackgroundSidebar;
+            lblLogo.Font = AppTheme.FontTitle;
+            lblLogo.ForeColor = AppTheme.TextWhite;
+
+            // Menu buttons
+            StyleHelper.ApplySidebarButton(btnDashboard, true);
+            StyleHelper.ApplySidebarButton(btnQuanLyThanhVien);
+            StyleHelper.ApplySidebarButton(btnReport);
+            StyleHelper.ApplySuccessButton(btnOpenAddForm);
+            btnOpenAddForm.TextAlign = ContentAlignment.MiddleLeft;
+            btnOpenAddForm.Padding = new Padding(15, 0, 0, 0);
+            StyleHelper.ApplyDangerButton(btnLogout);
+
+            // User info
+            lblUserInfo.Font = AppTheme.FontBodyBold;
+            lblUserInfo.ForeColor = AppTheme.TextWhite;
+            lblUserRole.Font = AppTheme.FontSmall;
+            lblUserRole.ForeColor = AppTheme.BorderLight;
+
+            // Top panel
+            panelTop.BackColor = AppTheme.BackgroundWhite;
+            lblSearch.Font = AppTheme.FontBodyBold;
+            lblSearch.ForeColor = AppTheme.TextPrimary;
+            lblFilter.Font = AppTheme.FontBodyBold;
+            lblFilter.ForeColor = AppTheme.TextPrimary;
+            lblSort.Font = AppTheme.FontBodyBold;
+            lblSort.ForeColor = AppTheme.TextPrimary;
+
+            // Export button
+            StyleHelper.ApplySuccessButton(btnExportCSV);
+
+            // Main content
+            panelMain.BackColor = AppTheme.BackgroundLight;
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -418,6 +461,175 @@ namespace btlwindow
                     Application.Exit();
                 }
             }
+        }
+
+        // ============================================================
+        // XỬ LÝ QUẢN LÝ THÀNH VIÊN
+        // ============================================================
+        private void btnQuanLyThanhVien_Click(object sender, EventArgs e)
+        {
+            // Ẩn panel chính (Kanban board) với animation
+            AnimatePageTransition(() =>
+            {
+                panelMain.Visible = false;
+                panelTop.Visible = false;
+
+                // Xóa các control cũ (nếu có)
+                RemovePageControls();
+
+                // Tạo và hiển thị user control quản lý thành viên
+                ucManageMembers ucMembers = new ucManageMembers();
+                ucMembers.Dock = DockStyle.Fill;
+                ucMembers.Tag = "PageContent";
+
+                // Thêm user control vào form
+                this.Controls.Add(ucMembers);
+                ucMembers.BringToFront();
+
+                // Highlight nút menu đang active
+                HighlightActiveMenu(btnQuanLyThanhVien);
+            });
+        }
+
+        // ============================================================
+        // XỬ LÝ QUAY LẠI DASHBOARD
+        // ============================================================
+        private void btnDashboard_Click(object sender, EventArgs e)
+        {
+            AnimatePageTransition(() =>
+            {
+                // Xóa các page control
+                RemovePageControls();
+
+                // Hiện lại Kanban board
+                panelMain.Visible = true;
+                panelTop.Visible = true;
+
+                // Reload dữ liệu
+                LoadAllTasks();
+
+                // Highlight nút menu đang active
+                HighlightActiveMenu(btnDashboard);
+            });
+        }
+
+        // ============================================================
+        // XÓA CÁC PAGE CONTROL
+        // ============================================================
+        private void RemovePageControls()
+        {
+            for (int i = this.Controls.Count - 1; i >= 0; i--)
+            {
+                Control ctrl = this.Controls[i];
+                if (ctrl.Tag?.ToString() == "PageContent")
+                {
+                    this.Controls.Remove(ctrl);
+                    ctrl.Dispose();
+                }
+            }
+        }
+
+        // ============================================================
+        // ANIMATION CHUYỂN TRANG
+        // ============================================================
+        private void AnimatePageTransition(Action onComplete)
+        {
+            // Disable controls during transition
+            this.Enabled = false;
+
+            Timer timer = new Timer();
+            timer.Interval = 5;
+            int step = 0;
+            int maxSteps = 8;
+
+            timer.Tick += (s, e) =>
+            {
+                step++;
+                if (step >= maxSteps / 2 && step == maxSteps / 2)
+                {
+                    // Thực hiện chuyển trang ở giữa animation
+                    onComplete?.Invoke();
+                }
+
+                if (step >= maxSteps)
+                {
+                    timer.Stop();
+                    timer.Dispose();
+                    this.Enabled = true;
+                }
+            };
+
+            timer.Start();
+        }
+
+        // ============================================================
+        // XỬ LÝ QUẢN LÝ BÁO CÁO
+        // ============================================================
+        private void btnReport_Click(object sender, EventArgs e)
+        {
+            // Ẩn panel chính (Kanban board) với animation
+            AnimatePageTransition(() =>
+            {
+                panelMain.Visible = false;
+                panelTop.Visible = false;
+
+                // Xóa các control cũ (nếu có)
+                RemovePageControls();
+
+                // Tạo và hiển thị user control báo cáo
+                ucReport uc = new ucReport();
+                uc.Dock = DockStyle.Fill;
+                uc.Tag = "PageContent";
+
+                // Thêm user control vào form
+                this.Controls.Add(uc);
+                uc.BringToFront();
+
+                // Highlight nút menu đang active
+                HighlightActiveMenu(btnReport);
+            });
+        }
+
+        // ============================================================
+        // XỬ LÝ TAG & NHÓM
+        // ============================================================
+        private void btnTagGroup_Click(object sender, EventArgs e)
+        {
+            AnimatePageTransition(() =>
+            {
+                panelMain.Visible = false;
+                panelTop.Visible = false;
+
+                // Xóa các control cũ (nếu có)
+                RemovePageControls();
+
+                // Tạo và hiển thị user control tag & nhóm
+                ucTagGroup uc = new ucTagGroup();
+                uc.Dock = DockStyle.Fill;
+                uc.Tag = "PageContent";
+
+                // Thêm user control vào form
+                this.Controls.Add(uc);
+                uc.BringToFront();
+
+                // Highlight nút menu đang active
+                HighlightActiveMenu(btnTagGroup);
+            });
+        }
+
+        // ============================================================
+        // HIGHLIGHT MENU ĐANG ACTIVE
+        // ============================================================
+        private void HighlightActiveMenu(Button activeBtn)
+        {
+            // Reset tất cả nút về màu mặc định
+            btnDashboard.BackColor = AppTheme.PrimaryLight;
+            btnQuanLyThanhVien.BackColor = AppTheme.PrimaryLight;
+            btnReport.BackColor = AppTheme.PrimaryLight;
+            btnTagGroup.BackColor = AppTheme.PrimaryLight;
+
+            // Highlight nút đang active
+            activeBtn.BackColor = AppTheme.PrimaryDark;
         }
     }
 }

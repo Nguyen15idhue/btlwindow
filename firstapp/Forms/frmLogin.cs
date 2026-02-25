@@ -9,6 +9,22 @@ namespace btlwindow
         public frmLogin()
         {
             InitializeComponent();
+            ApplyTheme();
+        }
+
+        private void ApplyTheme()
+        {
+            StyleHelper.ApplyFormStyle(this);
+            this.BackColor = AppTheme.BackgroundWhite;
+
+            // Title
+            lblTitle.Font = AppTheme.FontTitle;
+            lblTitle.ForeColor = AppTheme.PrimaryColor;
+
+            // Buttons
+            StyleHelper.ApplyPrimaryButton(btnLogin);
+            StyleHelper.ApplySecondaryButton(btnRegister);
+            StyleHelper.ApplyDangerButton(btnExit);
         }
 
         private void btnLogin_Click(object sender, EventArgs e)
