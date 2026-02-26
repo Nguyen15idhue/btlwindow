@@ -158,4 +158,84 @@ namespace btlwindow
             return list;
         }
     }
+
+    // Repository for Tags
+    public static class TagRepository
+    {
+        private static string connectionString = "Server=localhost;Database=kanban_simple;Port=3306;User Id=root;Password=;";
+
+        public static List<TagModel> GetAllTags()
+        {
+            return TagGroupRepository.GetAllTags();
+        }
+
+        public static bool AddTag(string tenTag, string mauSac)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "INSERT INTO tags (ten_tag, mau_sac, ngay_tao) VALUES (@tenTag, @mauSac, NOW())";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@tenTag", tenTag);
+                        cmd.Parameters.AddWithValue("@mauSac", mauSac);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Loi them tag: " + ex.Message);
+                return false;
+            }
+        }
+
+        public static bool UpdateTag(int id, string tenTag, string mauSac)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "UPDATE tags SET ten_tag = @tenTag, mau_sac = @mauSac WHERE id = @id";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@tenTag", tenTag);
+                        cmd.Parameters.AddWithValue("@mauSac", mauSac);
+                        cmd.Parameters.AddWithValue("@id", id);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Loi cap nhat tag: " + ex.Message);
+                return false;
+            }
+        }
+
+        public static bool DeleteTag(int id)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                {
+                    conn.Open();
+                    string query = "DELETE FROM tags WHERE id = @id";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@id", id);
+                        return cmd.ExecuteNonQuery() > 0;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Loi xoa tag: " + ex.Message);
+                return false;
+            }
+        }
+    }
 }

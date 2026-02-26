@@ -22,6 +22,7 @@ namespace btlwindow
 
         public DateTime HanHoanThanh { get; set; } // han_hoan_thanh
         public string DoUuTien { get; set; } // do_uu_tien (Cao, Trung bình, Thấp)
+        public DateTime NgayTao { get; set; } // ngay_tao
 
         // Nhóm công việc
         public int? NhomId { get; set; } // nhom_id

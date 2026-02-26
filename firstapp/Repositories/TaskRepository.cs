@@ -66,6 +66,9 @@ namespace btlwindow
 
                             task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
 
+                            if (!reader.IsDBNull(reader.GetOrdinal("ngay_tao")))
+                                task.NgayTao = reader.GetDateTime("ngay_tao");
+
                             // Nhóm
                             task.NhomId = reader.IsDBNull(reader.GetOrdinal("nhom_id")) ? (int?)null : reader.GetInt32("nhom_id");
                             task.TenNhom = reader.IsDBNull(reader.GetOrdinal("ten_nhom")) ? "" : reader.GetString("ten_nhom");
@@ -408,6 +411,9 @@ namespace btlwindow
 
                             task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
 
+                            if (!reader.IsDBNull(reader.GetOrdinal("ngay_tao")))
+                                task.NgayTao = reader.GetDateTime("ngay_tao");
+
                             return task;
                         }
                     }
@@ -466,6 +472,9 @@ namespace btlwindow
                                 task.HanHoanThanh = reader.GetDateTime("han_hoan_thanh");
 
                             task.DoUuTien = reader.IsDBNull(reader.GetOrdinal("do_uu_tien")) ? "Trung bình" : reader.GetString("do_uu_tien");
+
+                            if (!reader.IsDBNull(reader.GetOrdinal("ngay_tao")))
+                                task.NgayTao = reader.GetDateTime("ngay_tao");
 
                             list.Add(task);
                         }
