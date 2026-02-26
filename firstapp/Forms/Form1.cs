@@ -4,6 +4,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using btlwindow.Controls;
 
 namespace btlwindow
 {
@@ -12,10 +13,14 @@ namespace btlwindow
         // Danh sách tất cả task (cache)
         private List<TaskModel> allTasks = new List<TaskModel>();
 
+        // Floating chat button
+        private FloatingChatButton floatingChatButton;
+
         public Form1()
         {
             InitializeComponent();
             ApplyTheme();
+            InitializeFloatingChatButton();
         }
 
         private void ApplyTheme()
@@ -58,6 +63,16 @@ namespace btlwindow
 
             // Main content
             panelMain.BackColor = AppTheme.BackgroundLight;
+        }
+
+        /// <summary>
+        /// Khởi tạo floating chat button (AI Assistant)
+        /// </summary>
+        private void InitializeFloatingChatButton()
+        {
+            floatingChatButton = new FloatingChatButton(this);
+            this.Controls.Add(floatingChatButton);
+            floatingChatButton.BringToFront(); // Đưa lên trên cùng
         }
 
         private void Form1_Load(object sender, EventArgs e)
