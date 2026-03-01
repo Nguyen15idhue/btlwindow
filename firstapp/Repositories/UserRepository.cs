@@ -9,7 +9,6 @@ namespace btlwindow
 {
     public static class UserRepository
     {
-        private static string connectionString = "Server=localhost;Database=kanban_simple;Port=3306;User Id=root;Password=;";
 
         // Hash mật khẩu bằng SHA256
         private static string HashPassword(string password)
@@ -31,7 +30,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
 
@@ -75,7 +74,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = @"SELECT id, ho_ten, email, role, ngay_tao 
@@ -118,7 +117,7 @@ namespace btlwindow
             List<UserModel> users = new List<UserModel>();
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "SELECT id, ho_ten, email, role FROM nguoi_dung ORDER BY ho_ten";

@@ -1,23 +1,13 @@
-﻿using MySql.Data.MySqlClient; // Thư viện vừa cài
+using MySql.Data.MySqlClient;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Windows.Forms; // Để dùng MessageBox báo lỗi
+using System.Windows.Forms;
 
 namespace btlwindow
 {
     public class TaskRepository
     {
-        // 1. Cấu hình chuỗi kết nối (Connection String)
-        // Lưu ý: Nếu dùng XAMPP mặc định thì password để trống, port là 3306.
-        private static string connectionString = "Server=localhost;Database=kanban_simple;Port=3306;User Id=root;Password=;";
-
-        // 2. Hàm lấy kết nối
-        public static MySqlConnection GetConnection()
-        {
-            return new MySqlConnection(connectionString);
-        }
-
         // ==========================================================
         // HÀM 1: LoadTasks - Lấy toàn bộ danh sách công việc
         // ==========================================================
@@ -38,7 +28,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -133,7 +123,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -184,7 +174,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "SELECT id, ho_ten FROM nguoi_dung ORDER BY ho_ten";
@@ -259,7 +249,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -285,7 +275,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -324,7 +314,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -384,7 +374,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);
@@ -445,7 +435,7 @@ namespace btlwindow
 
             try
             {
-                using (MySqlConnection conn = GetConnection())
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     MySqlCommand cmd = new MySqlCommand(query, conn);

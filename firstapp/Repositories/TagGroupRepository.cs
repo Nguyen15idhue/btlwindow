@@ -15,14 +15,13 @@ namespace btlwindow
 
     public static class TagGroupRepository
     {
-        private static string connectionString = "Server=localhost;Database=kanban_simple;Port=3306;User Id=root;Password=;";
 
         public static List<TagGroupModel> GetAllTagGroups()
         {
             List<TagGroupModel> list = new List<TagGroupModel>();
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "SELECT id, ten_nhom, mau_sac, mo_ta FROM nhom_cong_viec ORDER BY ten_nhom";
@@ -53,7 +52,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "INSERT INTO nhom_cong_viec (ten_nhom, mau_sac, mo_ta) VALUES (@tenNhom, @mauSac, @moTa)";
@@ -77,7 +76,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "UPDATE nhom_cong_viec SET ten_nhom = @tenNhom, mau_sac = @mauSac, mo_ta = @moTa WHERE id = @id";
@@ -102,7 +101,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "DELETE FROM nhom_cong_viec WHERE id = @id";
@@ -132,7 +131,7 @@ namespace btlwindow
             List<TagModel> list = new List<TagModel>();
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "SELECT id, ten_tag, mau_sac FROM tags ORDER BY ten_tag";
@@ -162,7 +161,6 @@ namespace btlwindow
     // Repository for Tags
     public static class TagRepository
     {
-        private static string connectionString = "Server=localhost;Database=kanban_simple;Port=3306;User Id=root;Password=;";
 
         public static List<TagModel> GetAllTags()
         {
@@ -173,7 +171,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "INSERT INTO tags (ten_tag, mau_sac, ngay_tao) VALUES (@tenTag, @mauSac, NOW())";
@@ -196,7 +194,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "UPDATE tags SET ten_tag = @tenTag, mau_sac = @mauSac WHERE id = @id";
@@ -220,7 +218,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "DELETE FROM tags WHERE id = @id";

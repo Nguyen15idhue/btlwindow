@@ -7,14 +7,13 @@ namespace btlwindow
 {
     public static class MemberRepository
     {
-        private static string connectionString = "Server=localhost;Database=kanban_simple;Port=3306;User Id=root;Password=;";
 
         public static List<MemberModel> GetAllMembers()
         {
             List<MemberModel> list = new List<MemberModel>();
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "SELECT id, ho_ten, email, role, ngay_tao FROM nguoi_dung ORDER BY ho_ten";
@@ -46,7 +45,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "UPDATE nguoi_dung SET role = @role WHERE id = @id";
@@ -69,7 +68,7 @@ namespace btlwindow
         {
             try
             {
-                using (MySqlConnection conn = new MySqlConnection(connectionString))
+                using (MySqlConnection conn = DbConfig.GetConnection())
                 {
                     conn.Open();
                     string query = "DELETE FROM nguoi_dung WHERE id = @id";

@@ -254,6 +254,7 @@
       <DependentUpon>ucManageMembers.cs</DependentUpon>
     </Compile>
     <Compile Include="Helpers\AppTheme.cs" />
+    <Compile Include="Helpers\DbConfig.cs" />
     <Compile Include="Helpers\StyleHelper.cs" />
     <Compile Include="Helpers\NavigationManager.cs" />
     <Compile Include="Repositories\MemberRepository.cs" />
